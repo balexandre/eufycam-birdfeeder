@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fuglekiggeren — a camera bird feeder</title>
+  <meta name="description" content="A 3D-printed bird feeder that houses a eufyCam 2C Pro, built for Danish gardens. Model, print settings, solar, weather-proofing and build notes.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+      --font-serif: "Fraunces", ui-serif, Georgia, serif;
+      --color-paper: #f7f4ee;
+      --color-sand: #d8c8a6;
+      --color-sand-dark: #a8916a;
+      --color-ink: #26282b;
+      --color-moss: #5d6b4f;
+    }
+    @layer components {
+      .section { @apply mx-auto max-w-5xl px-4 py-16 sm:px-6; }
+      .eyebrow { @apply text-xs font-semibold uppercase tracking-[0.18em] text-moss; }
+      .h2 { @apply mt-2 font-serif text-3xl text-ink sm:text-4xl; }
+      .lead { @apply mt-3 max-w-2xl text-ink/70; }
+      .card { @apply rounded-2xl border border-ink/10 bg-white p-5; }
+      .chip { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium; }
+      .tbl { @apply w-full text-left text-sm; }
+      .tbl th { @apply border-b border-ink/15 py-2 pr-4 font-medium text-ink/60; }
+      .tbl td { @apply border-b border-ink/5 py-2.5 pr-4 align-top; }
+    }
+  </style>
+  <style>
+    [x-cloak] { display: none !important; }
+    model-viewer { --poster-color: transparent; }
+  </style>
+</head>
+<body class="bg-paper font-sans text-ink antialiased" x-data="site()">
+
+  <!-- nav -->
+  <header class="sticky top-0 z-20 border-b border-ink/10 bg-paper/90 backdrop-blur">
+    <nav class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
+      <a href="#top" class="font-serif text-lg">Fuglekiggeren</a>
+      <button class="sm:hidden" @click="menu = !menu" aria-label="Menu">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <ul class="hidden gap-5 text-sm text-ink/70 sm:flex">
+        <template x-for="l in links"><li><a :href="'#' + l.id" class="hover:text-ink" x-text="l.label"></a></li></template>
+      </ul>
+    </nav>
+    <ul x-cloak x-show="menu" @click="menu = false" class="space-y-1 border-t border-ink/10 px-4 py-3 text-sm sm:hidden">
+      <template x-for="l in links"><li><a :href="'#' + l.id" class="block py-1" x-text="l.label"></a></li></template>
+    </ul>
+  </header>
+
+  <!-- hero + viewer -->
+  <section id="top" class="section pt-10">
+    <div class="grid items-center gap-10 lg:grid-cols-[1fr_1.15fr]">
+      <div>
+        <span class="chip bg-sand/50 text-sand-dark">v0.1 · first draft, not printed yet</span>
+        <h1 class="mt-4 font-serif text-5xl leading-tight sm:text-6xl">Fuglekiggeren</h1>
+        <p class="mt-1 font-serif text-xl italic text-ink/60">“the birdwatcher”</p>
+        <p class="lead">A 3D-printed bird feeder with a eufyCam 2C Pro tucked inside its roof. It is a present for my grandparents in Denmark, so they can watch the garden birds up close in the eufy app. A small solar panel keeps the camera charged.</p>
+        <div class="mt-6 flex flex-wrap gap-3 text-sm">
+          <a href="#downloads" class="rounded-full bg-ink px-5 py-2.5 font-medium text-paper hover:bg-ink/85">Download files</a>
+          <a href="https://github.com/balexandre/eufycam-birdfeeder" class="rounded-full border border-ink/20 px-5 py-2.5 font-medium hover:border-ink/50">GitHub</a>
+        </div>
+      </div>
+      <div class="card p-3">
+        <model-viewer :src="'models/web/' + view + '.glb'" camera-controls auto-rotate auto-rotate-delay="2500" rotation-per-second="18deg"
+          shadow-intensity="0.6" exposure="1.05" camera-orbit="-35deg 70deg auto" interaction-prompt="none"
+          alt="3D model of the bird feeder" class="h-[360px] w-full sm:h-[440px]"></model-viewer>
+        <div class="flex flex-wrap gap-1.5 border-t border-ink/10 p-2">
+          <template x-for="v in views">
+            <button @click="view = v.id" x-text="v.label"
+              :class="view === v.id ? 'bg-ink text-paper' : 'bg-paper text-ink/70 hover:text-ink'"
+              class="rounded-full px-3 py-1 text-xs font-medium"></button>
+          </template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- concept -->
+  <section id="design" class="section border-t border-ink/10">
+    <p class="eyebrow">Design</p>
+    <h2 class="h2">A little house with a camera in the attic</h2>
+    <p class="lead">The style is inspired by ribbed, house-shaped camera feeders, but the geometry is drawn from scratch around the eufyCam 2C Pro, which is tall and has a ¼″-20 thread on the back. The camera sits in a dry bay at the back and looks out through a window at the seed tray and perch.</p>
+    <div class="mt-8 grid gap-4 sm:grid-cols-2">
+      <figure class="card p-2"><img src="img/render-exploded.png" alt="Exploded view of the parts" class="w-full"><figcaption class="px-3 pb-2 text-sm text-ink/60">Exploded view: hood, base, window, camera carriage, tray.</figcaption></figure>
+      <figure class="card p-2"><img src="img/render-inside.png" alt="Inside with the hood removed" class="w-full"><figcaption class="px-3 pb-2 text-sm text-ink/60">Hood removed: the camera on its sliding carriage behind the window.</figcaption></figure>
+    </div>
+    <div class="mt-8 grid gap-4 sm:grid-cols-3">
+      <template x-for="i in ideas">
+        <div class="card"><h3 class="font-medium" x-text="i.t"></h3><p class="mt-1.5 text-sm text-ink/70" x-text="i.d"></p></div>
+      </template>
+    </div>
+  </section>
+
+  <!-- parts -->
+  <section id="parts" class="section border-t border-ink/10">
+    <p class="eyebrow">Parts</p>
+    <h2 class="h2">What gets printed</h2>
+    <p class="lead">Five printed parts. All of them fit the Bambu Lab X2D bed and are already turned the right way up in the STL and 3MF files.</p>
+    <div class="mt-6 overflow-x-auto">
+      <table class="tbl min-w-[640px]">
+        <thead><tr><th>Part</th><th>Colour</th><th>Print size (mm)</th><th>Orientation</th><th>Notes</th></tr></thead>
+        <tbody>
+          <template x-for="p in parts">
+            <tr>
+              <td class="font-medium" x-text="p.name"></td>
+              <td><span class="inline-flex items-center gap-2"><span class="h-3.5 w-3.5 rounded-full border border-ink/20" :style="'background:' + p.hex"></span><span x-text="p.colour"></span></span></td>
+              <td class="tabular-nums" x-text="p.size"></td>
+              <td x-text="p.orient"></td>
+              <td class="text-ink/70" x-text="p.notes"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+    <h3 class="mt-10 font-medium">Hardware</h3>
+    <ul class="mt-3 grid gap-2 text-sm text-ink/80 sm:grid-cols-2">
+      <li class="card py-3">2 × M5 × 12 bolt + M5 nut, to lock the camera carriage</li>
+      <li class="card py-3">1 × ¼″-20 screw, about 12 mm, to hold the camera (a thumb screw is nicest)</li>
+      <li class="card py-3">4 × M3 × 10 self-tapping screws, to hold the hood to the base</li>
+      <li class="card py-3">2 × outdoor wood screws + plugs (wall) <em>or</em> a 25 mm webbing strap (tree)</li>
+    </ul>
+  </section>
+
+  <!-- filament -->
+  <section id="print" class="section border-t border-ink/10">
+    <p class="eyebrow">Printing</p>
+    <h2 class="h2">PETG for the prototype, ASA for the real one</h2>
+    <p class="lead">PETG is fine for test-fitting and a season outside. ASA handles UV and Danish summers without fading or going brittle, so the gift version will be printed in ASA. Both print well in the enclosed X2D, and its two nozzles let the sand hood and the charcoal parts print in their own colours.</p>
+    <div class="mt-6 overflow-x-auto">
+      <table class="tbl min-w-[560px]">
+        <thead><tr><th></th><th>PETG (now)</th><th>ASA (final)</th></tr></thead>
+        <tbody>
+          <tr><td class="font-medium">Nozzle</td><td>240–250 °C</td><td>250–260 °C</td></tr>
+          <tr><td class="font-medium">Bed</td><td>70–80 °C, textured PEI</td><td>90–100 °C, textured PEI</td></tr>
+          <tr><td class="font-medium">Chamber</td><td>door can stay ajar</td><td>closed, let it warm up</td></tr>
+          <tr><td class="font-medium">Walls / top / bottom</td><td colspan="2">4 walls · 5 top · 4 bottom layers (weather-tight)</td></tr>
+          <tr><td class="font-medium">Infill</td><td colspan="2">15–20 % gyroid</td></tr>
+          <tr><td class="font-medium">Supports</td><td colspan="2">none expected; check the cable notch and keyholes in the slicer</td></tr>
+          <tr><td class="font-medium">Status</td><td><span class="chip bg-moss/15 text-moss">on the shelf</span></td><td><span class="chip bg-sand/50 text-sand-dark">to buy</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- camera & solar -->
+  <section id="power" class="section border-t border-ink/10">
+    <p class="eyebrow">Camera &amp; solar</p>
+    <h2 class="h2">No extra electronics, only a cable</h2>
+    <p class="lead">All the electronics are in the camera. The only wiring is the solar panel's 3 m cable, which goes into the camera's micro-USB port on its underside.</p>
+    <div class="mt-8 grid gap-4 sm:grid-cols-2">
+      <div class="card">
+        <h3 class="font-medium">eufyCam 2C Pro</h3>
+        <dl class="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
+          <dt class="text-ink/60">Body</dt><dd>48 × 80.6 × 57 mm, 198 g</dd>
+          <dt class="text-ink/60">Mount</dt><dd>¼″-20 thread on the back</dd>
+          <dt class="text-ink/60">Power port</dt><dd>micro-USB, bottom, rubber flap</dd>
+          <dt class="text-ink/60">Wakes on</dt><dd>PIR motion (body heat)</dd>
+        </dl>
+        <p class="mt-3 text-sm text-ink/70">The model leaves 35 mm under the camera for the plug and the bend in the cable. The cable runs across the floor and out through a notch at the back.</p>
+      </div>
+      <div class="card">
+        <h3 class="font-medium">5 W solar panel</h3>
+        <dl class="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
+          <dt class="text-ink/60">Size</dt><dd>185 × 158 × 16 mm, IP65</dd>
+          <dt class="text-ink/60">Cable</dt><dd>3 m</dd>
+          <dt class="text-ink/60">Aim</dt><dd>south, tilted steeply (60–70°) for the low winter sun</dd>
+          <dt class="text-ink/60">Mount</dt><dd>its own bracket, away from the feeder</dd>
+        </dl>
+        <p class="mt-3 text-sm text-ink/70">Denmark sits at about 56° N, so in December the sun hardly clears the trees. A steep panel catches more of the low sun and sheds snow. Expect to top up the battery by USB now and then in mid-winter.</p>
+      </div>
+    </div>
+    <div class="card mt-4 border-sand-dark/30 bg-sand/20">
+      <h3 class="font-medium">Things to test before it goes outside</h3>
+      <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-ink/80">
+        <li><strong>Focus distance.</strong> The camera is fixed-focus and wide-angle. Slide the carriage through its 40 mm of travel and find where a bird-sized object on the perch looks sharpest.</li>
+        <li><strong>Motion detection.</strong> A blue tit gives off very little heat. Set PIR sensitivity high and keep the perch in the middle of the frame.</li>
+        <li><strong>Animal detection.</strong> Check which eufy AI features this camera supports, and whether they need a HomeBase.</li>
+        <li><strong>Thread height.</strong> The model assumes the ¼″ thread is 40 mm above the bottom of the camera. Measure yours and change <code>CAM_THREAD_Z</code>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- weather -->
+  <section id="weather" class="section border-t border-ink/10">
+    <p class="eyebrow">Weather</p>
+    <h2 class="h2">Built for Danish weather</h2>
+    <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <template x-for="w in weather">
+        <div class="card"><h3 class="font-medium" x-text="w.t"></h3><p class="mt-1.5 text-sm text-ink/70" x-text="w.d"></p></div>
+      </template>
+    </div>
+  </section>
+
+  <!-- build -->
+  <section id="build" class="section border-t border-ink/10">
+    <p class="eyebrow">Assembly</p>
+    <h2 class="h2">Putting it together</h2>
+    <ol class="mt-8 space-y-3">
+      <template x-for="(s, i) in steps">
+        <li class="card flex gap-4"><span class="font-serif text-2xl text-sand-dark" x-text="i + 1"></span><p class="text-sm text-ink/80 pt-1.5" x-html="s"></p></li>
+      </template>
+    </ol>
+  </section>
+
+  <!-- birds -->
+  <section id="birds" class="section border-t border-ink/10">
+    <p class="eyebrow">Visitors</p>
+    <h2 class="h2">Who will come to the feeder</h2>
+    <p class="lead">Common feeder birds in Danish gardens. Sunflower seeds and fat balls (without the net) bring most of them.</p>
+    <div class="mt-6 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+      <template x-for="b in birds">
+        <div class="flex items-baseline justify-between rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-sm">
+          <span class="font-medium" x-text="b[0]"></span><span class="text-ink/55" x-text="b[1]"></span>
+        </div>
+      </template>
+    </div>
+  </section>
+
+  <!-- ideas / roadmap -->
+  <section id="ideas" class="section border-t border-ink/10">
+    <p class="eyebrow">Ideas &amp; open questions</p>
+    <h2 class="h2">Roadmap</h2>
+    <div class="mt-6 space-y-2">
+      <template x-for="r in roadmap">
+        <div class="flex items-start gap-3 rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm">
+          <span class="chip mt-0.5 shrink-0" :class="r.s === 'done' ? 'bg-moss/15 text-moss' : r.s === 'open' ? 'bg-sand/50 text-sand-dark' : 'bg-ink/5 text-ink/60'" x-text="r.s"></span>
+          <span x-text="r.t"></span>
+        </div>
+      </template>
+    </div>
+  </section>
+
+  <!-- downloads -->
+  <section id="downloads" class="section border-t border-ink/10">
+    <p class="eyebrow">Downloads</p>
+    <h2 class="h2">Files</h2>
+    <p class="lead"><strong>3MF</strong> or <strong>STL</strong> open straight in Bambu Studio. <strong>STEP</strong> is the editable CAD file, so open that one in Layerling if you want to change something.</p>
+    <div class="mt-6 overflow-x-auto">
+      <table class="tbl min-w-[480px]">
+        <thead><tr><th>Part</th><th>3MF</th><th>STL</th><th>STEP</th></tr></thead>
+        <tbody>
+          <template x-for="p in parts">
+            <tr>
+              <td class="font-medium" x-text="p.name"></td>
+              <td><a class="underline decoration-sand-dark underline-offset-4" :href="'models/3mf/' + p.id + '.3mf'" download>3mf</a></td>
+              <td><a class="underline decoration-sand-dark underline-offset-4" :href="'models/stl/' + p.id + '.stl'" download>stl</a></td>
+              <td><a class="underline decoration-sand-dark underline-offset-4" :href="'models/step/' + p.id + '.step'" download>step</a></td>
+            </tr>
+          </template>
+          <tr>
+            <td class="font-medium">Everything</td>
+            <td><a class="underline decoration-sand-dark underline-offset-4" href="models/3mf/all-parts.3mf" download>all-parts.3mf</a></td>
+            <td class="text-ink/40">—</td>
+            <td><a class="underline decoration-sand-dark underline-offset-4" href="models/step/assembly.step" download>assembly.step</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-6 text-sm text-ink/60">The model is generated from <a class="underline" href="https://github.com/balexandre/eufycam-birdfeeder/blob/master/cad/feeder.py">cad/feeder.py</a> (build123d). Every size in this page comes from the parameters at the top of that file.</p>
+  </section>
+
+  <footer class="border-t border-ink/10">
+    <div class="mx-auto max-w-5xl px-4 py-8 text-xs text-ink/50 sm:px-6">
+      Made with a Bambu Lab X2D for my bedsteforældre. The house-shaped, ribbed style was inspired by
+      <a class="underline" href="https://cults3d.com/en/3d-model/home/bird-feeder-camera-case-for-blink-camera-madebycastelao">MadeByCastelao’s Blink camera feeder</a>;
+      this is an independent design for a different camera.
+    </div>
+  </footer>
+
+  <script>
+    function site() {
+      return {
+        menu: false,
+        view: 'assembly',
+        links: [
+          { id: 'design', label: 'Design' }, { id: 'parts', label: 'Parts' }, { id: 'print', label: 'Printing' },
+          { id: 'power', label: 'Camera & solar' }, { id: 'weather', label: 'Weather' }, { id: 'build', label: 'Build' },
+          { id: 'ideas', label: 'Ideas' }, { id: 'downloads', label: 'Files' },
+        ],
+        views: [
+          { id: 'assembly', label: 'Assembled' }, { id: 'hood', label: 'Hood' }, { id: 'base', label: 'Base' },
+          { id: 'window', label: 'Window' }, { id: 'carriage', label: 'Carriage' }, { id: 'tray', label: 'Tray' },
+        ],
+        ideas: [
+          { t: 'Adjustable camera distance', d: 'The camera screws onto a carriage that slides 40 mm forward or back, so you can find the sharpest focus before locking it.' },
+          { t: 'Tree or wall', d: 'The back plate has keyholes for two wall screws and slots for a 25 mm strap around a tree trunk.' },
+          { t: 'Easy to clean', d: 'The tray slides out by its perch bar and has drain holes, so it can go straight under the tap.' },
+        ],
+        parts: [
+          { id: 'hood', name: 'Hood', colour: 'Sand', hex: '#d8c8a6', size: '146 × 176 × 220', orient: 'standing on its back edge', notes: 'Ribbed shell with a bigger drip rib at the front.' },
+          { id: 'base', name: 'Base', colour: 'Charcoal', hex: '#3b3e42', size: '145 × 175 × 225', orient: 'wall plate flat on the bed', notes: 'Wall plate, floor, tray rails, carriage slot, keyholes, strap slots, cable notch.' },
+          { id: 'window', name: 'Window', colour: 'Charcoal', hex: '#3b3e42', size: '129 × 167 × 3', orient: 'flat', notes: 'Keeps the camera bay dry and shaded, and slots into a groove in the floor.' },
+          { id: 'carriage', name: 'Carriage', colour: 'Graphite', hex: '#55595e', size: '48 × 45 × 90', orient: 'foot down', notes: 'Holds the camera by its ¼″-20 thread. Two M5 bolts lock it in the slot.' },
+          { id: 'tray', name: 'Tray', colour: 'Charcoal', hex: '#2e3134', size: '120 × 113 × 26', orient: 'bottom down', notes: 'Drain holes. The perch bar doubles as the handle.' },
+        ],
+        weather: [
+          { t: 'Rain from the side', d: 'A deep roof, a drip rib along the front edge, and the camera behind a window keep water off the lens.' },
+          { t: 'Standing water', d: 'Drain holes in both the tray and the floor stop seed going mouldy.' },
+          { t: 'Sun & UV', d: 'ASA for the final print. PETG and PLA soften and fade over a summer.' },
+          { t: 'Frost', d: 'No thin snap-fits that crack in the cold. Screws and grooves are used instead.' },
+          { t: 'Wind', d: 'Screwed to a wall or strapped tight to a trunk so it never swings. Hanging feeders give shaky video.' },
+          { t: 'Light', d: 'Point the feeder north or east so birds are lit from the front, not silhouetted against the sky. The panel faces south on its own bracket.' },
+        ],
+        steps: [
+          'Print the five parts. The hood in sand, the rest in charcoal.',
+          'Screw the <strong>base</strong> to a wall through the keyholes, or thread a strap through the slots and around a tree trunk.',
+          'Push the micro-USB plug into the camera, then screw the <strong>camera</strong> onto the <strong>carriage</strong> with the ¼″-20 screw.',
+          'Drop the carriage into the floor slot, slide it to the sharpest focus, and tighten the two M5 bolts.',
+          'Route the cable across the floor and out through the notch at the back, leaving a drip loop below the feeder.',
+          'Slide the <strong>window</strong> into its groove, then slide the <strong>hood</strong> over the lip and fix it with four M3 screws.',
+          'Fill the <strong>tray</strong> and slide it in.',
+        ],
+        birds: [
+          ['Musvit', 'Great tit'], ['Blåmejse', 'Blue tit'], ['Rødhals', 'Robin'], ['Solsort', 'Blackbird'],
+          ['Gråspurv', 'House sparrow'], ['Skovspurv', 'Tree sparrow'], ['Bogfinke', 'Chaffinch'], ['Grønirisk', 'Greenfinch'],
+          ['Spætmejse', 'Nuthatch'], ['Stor flagspætte', 'Great spotted woodpecker'], ['Kvækerfinke', 'Brambling (winter)'], ['Sumpmejse', 'Marsh tit'],
+        ],
+        roadmap: [
+          { s: 'done', t: 'First parametric model (build123d) with STL, 3MF and STEP exports' },
+          { s: 'open', t: 'At 22 cm deep, the feeder is longer than ideal. Shorten it once the real focus distance is known.' },
+          { s: 'open', t: 'Measure the real ¼″ thread height on the camera and update CAM_THREAD_Z' },
+          { s: 'next', t: 'Print a PETG test of the carriage and window and check the camera fit and focus' },
+          { s: 'next', t: 'Swap the screwed hood for a slide-and-lock latch' },
+          { s: 'next', t: 'Fat-ball holder that clips onto the tray in winter' },
+          { s: 'next', t: 'Solar panel bracket (wall and pole versions)' },
+          { s: 'next', t: 'Danish version of this page for the grandparents' },
+          { s: 'later', t: 'Final print in ASA' },
+        ],
+      };
+    }
+  </script>
+</body>
+</html>
